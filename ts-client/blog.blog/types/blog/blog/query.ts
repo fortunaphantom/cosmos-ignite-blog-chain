@@ -1,6 +1,8 @@
 /* eslint-disable */
 import _m0 from "protobufjs/minimal";
+import { PageRequest, PageResponse } from "../../cosmos/base/query/v1beta1/pagination";
 import { Params } from "./params";
+import { Post } from "./post";
 
 export const protobufPackage = "blog.blog";
 
@@ -12,6 +14,18 @@ export interface QueryParamsRequest {
 export interface QueryParamsResponse {
   /** params holds all the parameters of this module. */
   params: Params | undefined;
+}
+
+export interface QueryPostsRequest {
+  /** Adding pagination to request */
+  pagination: PageRequest | undefined;
+}
+
+export interface QueryPostsResponse {
+  /** Returning a list of posts */
+  Post: Post[];
+  /** Adding pagination to response */
+  pagination: PageResponse | undefined;
 }
 
 function createBaseQueryParamsRequest(): QueryParamsRequest {
@@ -102,10 +116,127 @@ export const QueryParamsResponse = {
   },
 };
 
+function createBaseQueryPostsRequest(): QueryPostsRequest {
+  return { pagination: undefined };
+}
+
+export const QueryPostsRequest = {
+  encode(message: QueryPostsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.pagination !== undefined) {
+      PageRequest.encode(message.pagination, writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryPostsRequest {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryPostsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.pagination = PageRequest.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryPostsRequest {
+    return { pagination: isSet(object.pagination) ? PageRequest.fromJSON(object.pagination) : undefined };
+  },
+
+  toJSON(message: QueryPostsRequest): unknown {
+    const obj: any = {};
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageRequest.toJSON(message.pagination) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryPostsRequest>, I>>(object: I): QueryPostsRequest {
+    const message = createBaseQueryPostsRequest();
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageRequest.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseQueryPostsResponse(): QueryPostsResponse {
+  return { Post: [], pagination: undefined };
+}
+
+export const QueryPostsResponse = {
+  encode(message: QueryPostsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    for (const v of message.Post) {
+      Post.encode(v!, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.pagination !== undefined) {
+      PageResponse.encode(message.pagination, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): QueryPostsResponse {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseQueryPostsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.Post.push(Post.decode(reader, reader.uint32()));
+          break;
+        case 2:
+          message.pagination = PageResponse.decode(reader, reader.uint32());
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): QueryPostsResponse {
+    return {
+      Post: Array.isArray(object?.Post) ? object.Post.map((e: any) => Post.fromJSON(e)) : [],
+      pagination: isSet(object.pagination) ? PageResponse.fromJSON(object.pagination) : undefined,
+    };
+  },
+
+  toJSON(message: QueryPostsResponse): unknown {
+    const obj: any = {};
+    if (message.Post) {
+      obj.Post = message.Post.map((e) => e ? Post.toJSON(e) : undefined);
+    } else {
+      obj.Post = [];
+    }
+    message.pagination !== undefined
+      && (obj.pagination = message.pagination ? PageResponse.toJSON(message.pagination) : undefined);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<QueryPostsResponse>, I>>(object: I): QueryPostsResponse {
+    const message = createBaseQueryPostsResponse();
+    message.Post = object.Post?.map((e) => Post.fromPartial(e)) || [];
+    message.pagination = (object.pagination !== undefined && object.pagination !== null)
+      ? PageResponse.fromPartial(object.pagination)
+      : undefined;
+    return message;
+  },
+};
+
 /** Query defines the gRPC querier service. */
 export interface Query {
   /** Parameters queries the parameters of the module. */
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse>;
+  /** Queries a list of Posts items. */
+  Posts(request: QueryPostsRequest): Promise<QueryPostsResponse>;
 }
 
 export class QueryClientImpl implements Query {
@@ -113,11 +244,18 @@ export class QueryClientImpl implements Query {
   constructor(rpc: Rpc) {
     this.rpc = rpc;
     this.Params = this.Params.bind(this);
+    this.Posts = this.Posts.bind(this);
   }
   Params(request: QueryParamsRequest): Promise<QueryParamsResponse> {
     const data = QueryParamsRequest.encode(request).finish();
     const promise = this.rpc.request("blog.blog.Query", "Params", data);
     return promise.then((data) => QueryParamsResponse.decode(new _m0.Reader(data)));
+  }
+
+  Posts(request: QueryPostsRequest): Promise<QueryPostsResponse> {
+    const data = QueryPostsRequest.encode(request).finish();
+    const promise = this.rpc.request("blog.blog.Query", "Posts", data);
+    return promise.then((data) => QueryPostsResponse.decode(new _m0.Reader(data)));
   }
 }
 
