@@ -4,25 +4,26 @@ import _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "blog.blog";
 
-export interface Post {
-  creator: string;
+export interface Comment {
   id: number;
+  creator: string;
   title: string;
   body: string;
+  postID: number;
   createdAt: number;
 }
 
-function createBasePost(): Post {
-  return { creator: "", id: 0, title: "", body: "", createdAt: 0 };
+function createBaseComment(): Comment {
+  return { id: 0, creator: "", title: "", body: "", postID: 0, createdAt: 0 };
 }
 
-export const Post = {
-  encode(message: Post, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
-    }
+export const Comment = {
+  encode(message: Comment, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.id !== 0) {
-      writer.uint32(16).uint64(message.id);
+      writer.uint32(8).uint64(message.id);
+    }
+    if (message.creator !== "") {
+      writer.uint32(18).string(message.creator);
     }
     if (message.title !== "") {
       writer.uint32(26).string(message.title);
@@ -30,24 +31,27 @@ export const Post = {
     if (message.body !== "") {
       writer.uint32(34).string(message.body);
     }
+    if (message.postID !== 0) {
+      writer.uint32(40).uint64(message.postID);
+    }
     if (message.createdAt !== 0) {
-      writer.uint32(40).int64(message.createdAt);
+      writer.uint32(48).int64(message.createdAt);
     }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): Post {
+  decode(input: _m0.Reader | Uint8Array, length?: number): Comment {
     const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasePost();
+    const message = createBaseComment();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
+          message.id = longToNumber(reader.uint64() as Long);
           break;
         case 2:
-          message.id = longToNumber(reader.uint64() as Long);
+          message.creator = reader.string();
           break;
         case 3:
           message.title = reader.string();
@@ -56,6 +60,9 @@ export const Post = {
           message.body = reader.string();
           break;
         case 5:
+          message.postID = longToNumber(reader.uint64() as Long);
+          break;
+        case 6:
           message.createdAt = longToNumber(reader.int64() as Long);
           break;
         default:
@@ -66,32 +73,35 @@ export const Post = {
     return message;
   },
 
-  fromJSON(object: any): Post {
+  fromJSON(object: any): Comment {
     return {
-      creator: isSet(object.creator) ? String(object.creator) : "",
       id: isSet(object.id) ? Number(object.id) : 0,
+      creator: isSet(object.creator) ? String(object.creator) : "",
       title: isSet(object.title) ? String(object.title) : "",
       body: isSet(object.body) ? String(object.body) : "",
+      postID: isSet(object.postID) ? Number(object.postID) : 0,
       createdAt: isSet(object.createdAt) ? Number(object.createdAt) : 0,
     };
   },
 
-  toJSON(message: Post): unknown {
+  toJSON(message: Comment): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
     message.id !== undefined && (obj.id = Math.round(message.id));
+    message.creator !== undefined && (obj.creator = message.creator);
     message.title !== undefined && (obj.title = message.title);
     message.body !== undefined && (obj.body = message.body);
+    message.postID !== undefined && (obj.postID = Math.round(message.postID));
     message.createdAt !== undefined && (obj.createdAt = Math.round(message.createdAt));
     return obj;
   },
 
-  fromPartial<I extends Exact<DeepPartial<Post>, I>>(object: I): Post {
-    const message = createBasePost();
-    message.creator = object.creator ?? "";
+  fromPartial<I extends Exact<DeepPartial<Comment>, I>>(object: I): Comment {
+    const message = createBaseComment();
     message.id = object.id ?? 0;
+    message.creator = object.creator ?? "";
     message.title = object.title ?? "";
     message.body = object.body ?? "";
+    message.postID = object.postID ?? 0;
     message.createdAt = object.createdAt ?? 0;
     return message;
   },
